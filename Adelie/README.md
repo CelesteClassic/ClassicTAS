@@ -14,7 +14,7 @@ To step forward in time press L, which will advance the game one frame, and the 
 
 To step backwards in time press K, which will step 1 frame backwards, and you can change what was pressed before.
 
-To see the TAS in real time press P, which will start reproducing the inputs from the frame you are currently on.
+To see the TAS in real time press P, which will start reproducing the inputs from the frame you are currently on. (Note: you shouldn't input anything while the TAS is reproducing)
 
 To see the TAS in real time from the start press Ctrl+P, which will reproduce the inputs from the start.
 
