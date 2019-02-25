@@ -21,3 +21,5 @@ To see the TAS in real time from the start press Ctrl+P, which will reproduce th
 To save the TAS press M, which will automatically create a file called 'adelie.tas' in the love2d folder (Elaborate on this).
 
 To open a TAS file, simply drag the file into the window, note that this won't change the current state of the game, so you should always go back to the start after loading a TAS file.
+
+Press Y to see the current position, rem values (sub-pixels) and speed of the player on the console.
