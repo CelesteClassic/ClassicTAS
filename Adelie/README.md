@@ -1,6 +1,8 @@
 # Installation
 If you are using Windows or Mac, download the corresponding zip, then unzip it.
+
 If you are on Windows, you will extract an executable and some .dll files into a folder, then you can run the executable.
+
 If you are on Mac, you will find a .app file inside the zip which you can execute.
 
 If you are on Linux, download AdelieTAS.love and install the [official LÖVE packages](https://www.love2d.org), which will then let you run the .love file.
