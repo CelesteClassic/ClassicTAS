@@ -3,7 +3,7 @@ If you are using Windows or Mac, download the corresponding zip, then unzip it.
 If you are on Windows, you will extract an executable and some .dll files into a folder, then you can run the executable.
 If you are on Mac, you will find a .app file inside the zip which you can execute.
 
-If you are on Linux, wait some time until I export it for Linux.
+If you are on Linux, download AdelieTAS.love and install the [official LÖVE packages](https://www.love2d.org)
 
 # Usage
 First of all, you will see a timer in the top-left corner, which tracks the time, and a black rectangle right next to it, the black rectangle is an input viewer, where you can see what keys are being pressed on that frame. The input viewer will be blacked out because you can inout anything yet, as you are in the spawning state, once the spawning state is over (at 00:01.16) you will be able to see the keys.
