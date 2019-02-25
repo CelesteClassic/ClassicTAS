@@ -23,3 +23,5 @@ To save the TAS press M, which will automatically create a file called 'adelie.t
 To open a TAS file, simply drag the file into the window, note that this won't change the current state of the game, so you should always go back to the start after loading a TAS file.
 
 Press Y to see the current position, rem values (sub-pixels) and speed of the player on the console.
+
+You can press F1 or F6 to save a screenshot, F3 or F8 to start a recording and F4 or F9 to save the recording, both saved to the love2d folder.
