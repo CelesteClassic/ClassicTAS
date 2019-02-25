@@ -16,9 +16,9 @@ To step backwards in time press K, which will step 1 frame backwards, and you ca
 
 To see the TAS in real time press P, which will start reproducing the inputs from the frame you are currently on. (Note: you shouldn't input anything while the TAS is reproducing)
 
-To see the TAS in real time from the start press Ctrl+P, which will reproduce the inputs from the start.
+To go back to the first frame press D, which will restart the game but still keep your inputs.
 
-To save the TAS press M, which will automatically create a file called 'adelie.tas' in the love2d folder (Elaborate on this).
+To save the TAS press M, which will automatically create a file called 'adelie.tas' in the love2d folder (check the [love2d page](https://love2d.org/wiki/love.filesystem) for more information).
 
 To open a TAS file, simply drag the file into the window, note that this won't change the current state of the game, so you should always go back to the start after loading a TAS file.
 
