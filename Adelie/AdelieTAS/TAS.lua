@@ -754,23 +754,23 @@ local function keypress(key)
 		TAS.states[TAS.current_frame]=state
 		TAS.state_flags[TAS.current_frame]=state_flag
 	elseif key=='k' then
-		TAS.current_frame=TAS.current_frame-1
-		if pico8.cart.roomid==1 then
-			TAS.practice_time=TAS.practice_time-1
+		if TAS.current_frame>0 then
+			TAS.current_frame=TAS.current_frame-1
+			if pico8.cart.roomid==1 then
+				TAS.practice_time=TAS.practice_time-1
+			end
+			if pico8.cart.show_keys then
+				TAS.keypress_frame=TAS.keypress_frame-1
+			end
+			set_state(TAS.states[TAS.current_frame], TAS.state_flags[TAS.current_frame])
 		end
-		if pico8.cart.show_keys then
-			TAS.keypress_frame=TAS.keypress_frame-1
-		end
-		set_state(TAS.states[TAS.current_frame], TAS.state_flags[TAS.current_frame])
+	elseif key=='d' then
+		TAS.current_frame=0
+		TAS.practice_time=0
+		TAS.keypress_frame=1
+		_load()
 	elseif key=='p' then
 		TAS.reproduce=not TAS.reproduce
-		if love.keyboard.isDown('lctrl') then
-			TAS.reproduce=true
-			TAS.current_frame=0
-			TAS.practice_time=0
-			TAS.keypress_frame=1
-			_load()
-		end
 	elseif key=='y' then
 		for _,o in pairs(pico8.cart.playerobj) do
 			if o.type.id=="player" then
@@ -783,17 +783,29 @@ local function keypress(key)
 	elseif key=='m' then
 		save_file()
 	elseif key=='up' then
-		TAS.keypresses[TAS.keypress_frame][2]=not TAS.keypresses[TAS.keypress_frame][2]
+		if not TAS.reproduce then
+			TAS.keypresses[TAS.keypress_frame][2]=not TAS.keypresses[TAS.keypress_frame][2]
+		end
 	elseif key=='down' then
-		TAS.keypresses[TAS.keypress_frame][3]=not TAS.keypresses[TAS.keypress_frame][3]
+		if not TAS.reproduce then
+			TAS.keypresses[TAS.keypress_frame][3]=not TAS.keypresses[TAS.keypress_frame][3]
+		end
 	elseif key=='left' then
-		TAS.keypresses[TAS.keypress_frame][0]=not TAS.keypresses[TAS.keypress_frame][0]
+		if not TAS.reproduce then
+			TAS.keypresses[TAS.keypress_frame][0]=not TAS.keypresses[TAS.keypress_frame][0]
+		end
 	elseif key=='right' then
-		TAS.keypresses[TAS.keypress_frame][1]=not TAS.keypresses[TAS.keypress_frame][1]
+		if not TAS.reproduce then
+			TAS.keypresses[TAS.keypress_frame][1]=not TAS.keypresses[TAS.keypress_frame][1]
+		end
 	elseif key=='c' or key=='z' then
-		TAS.keypresses[TAS.keypress_frame][4]=not TAS.keypresses[TAS.keypress_frame][4]
+		if not TAS.reproduce then
+			TAS.keypresses[TAS.keypress_frame][4]=not TAS.keypresses[TAS.keypress_frame][4]
+		end
 	elseif key=='x' then
-		TAS.keypresses[TAS.keypress_frame][5]=not TAS.keypresses[TAS.keypress_frame][5]
+		if not TAS.reproduce then
+			TAS.keypresses[TAS.keypress_frame][5]=not TAS.keypresses[TAS.keypress_frame][5]
+		end
 	end
 end
 TAS.keypress=keypress
