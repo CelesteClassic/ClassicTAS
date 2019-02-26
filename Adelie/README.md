@@ -8,7 +8,7 @@ If you are on Mac, you will find a .app file inside the zip which you can execut
 If you are on Linux, download AdelieTAS.love and install the [official LÖVE packages](https://www.love2d.org), which will then let you run the .love file.
 
 # Usage
-First of all, you will see a timer in the top-left corner, which tracks the time, and a black rectangle right next to it, the black rectangle is an input viewer, where you can see what keys are being pressed on that frame. The input viewer will be blacked out because you can inout anything yet, as you are in the spawning state, once the spawning state is over (at 00:01.16) you will be able to see the keys.
+First of all, you will see a timer in the top-left corner, which tracks the time, and a black rectangle right next to it, the black rectangle is an input viewer, where you can see what keys are being pressed on that frame. The input viewer will be blacked out because you can't input anything yet, as you are in the spawning state, once the spawning state is over (at 00:01.16) you will be able to see the keys.
 
 Each time you press a key (up, down, right, left, x, c, or z) that key will toggle on/off for that frame.
 
