@@ -12,6 +12,8 @@ First of all, you will see a timer in the top-left corner, which tracks the time
 
 Each time you press a key (up, down, right, left, x, c, or z) that key will toggle on/off for that frame.
 
+To go to the next level press F and to go to the previous level press S, note that this will reset the inputs.
+
 To step forward in time press L, which will advance the game one frame, and the keys that were inputted for that frame will be executed.
 
 To step backwards in time press K, which will step 1 frame backwards, and you can change what was pressed before.
