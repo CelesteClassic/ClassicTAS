@@ -458,6 +458,8 @@ local function update()
 	if TAS.advance_frame then
 		TAS.advance_frame=false
 		
+		pico8.cart.update=true
+		
 		if pico8.cart.start then
 			pico8.cart.start=false
 			TAS.current_frame=0
@@ -509,6 +511,8 @@ local function update()
 		if TAS.practice_timing then
 			TAS.practice_time=TAS.practice_time+1
 		end
+	else
+		pico8.cart.update=false
 	end
 	
 	if TAS.reproduce then
@@ -732,6 +736,7 @@ local function keypress(key)
 			end
 		end
 	elseif key=='d' then
+		TAS.reproduce=false
 		TAS.practice_timing=false
 		pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
 		pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)

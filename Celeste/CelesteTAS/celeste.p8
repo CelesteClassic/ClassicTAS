@@ -36,6 +36,7 @@ died=false
 start=false
 show_keys=false
 balloon_count=0
+update=false
 
 -- entry point --
 -----------------
@@ -815,28 +816,32 @@ big_chest={
 		if this.state==0 then
 			local hit=this.collide(player,0,8)
 			if hit~=nil and hit.is_solid(0,1) then
-				music(-1,500,7)
-				sfx(37)
-				pause_player=true
-				hit.spd.x=0
-				hit.spd.y=0
-				this.state=1
-				init_object(smoke,this.x,this.y)
-				init_object(smoke,this.x+8,this.y)
-				this.timer=60
+				if update then
+					music(-1,500,7)
+					sfx(37)
+					pause_player=true
+					hit.spd.x=0
+					hit.spd.y=0
+					this.state=1
+					init_object(smoke,this.x,this.y)
+					init_object(smoke,this.x+8,this.y)
+					this.timer=60
+				end
 			end
 			spr(96,this.x,this.y)
 			spr(97,this.x+8,this.y)
 		elseif this.state==1 then
-			this.timer-=1
-		 shake=5
-		 flash_bg=true
-			if this.timer<0 then
-				this.state=2
-				flash_bg=false
-				new_bg=true
-				init_object(orb,this.x+4,this.y+4)
-				pause_player=false
+			if update then
+				this.timer-=1
+				shake=5
+				flash_bg=true
+				if this.timer<0 then
+					this.state=2
+					flash_bg=false
+					new_bg=true
+					init_object(orb,this.x+4,this.y+4)
+					pause_player=false
+				end
 			end
 		end
 		spr(112,this.x,this.y+8)
@@ -853,16 +858,18 @@ orb={
 		this.particles={}
 	end,
 	draw=function(this)
-		this.spd.y=appr(this.spd.y,0,0.5)
-		local hit=this.collide(player,0,0)
-		if this.spd.y==0 and hit~=nil then
-		 music_timer=45
-			sfx(51)
-			freeze=10
-			shake=10
-			destroy_object(this)
-			max_djump=2
-			hit.djump=2
+		if update then
+			this.spd.y=appr(this.spd.y,0,0.5)
+			local hit=this.collide(player,0,0)
+			if this.spd.y==0 and hit~=nil then
+			 music_timer=45
+				sfx(51)
+				freeze=10
+				shake=10
+				destroy_object(this)
+				max_djump=2
+				hit.djump=2
+			end
 		end
 		
 		spr(102,this.x,this.y)
