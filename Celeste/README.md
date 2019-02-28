@@ -24,6 +24,8 @@ To go back to the first frame press D, which will restart the game but still kee
 
 To reload the level and delete your inputs press R.
 
+To hide/unhide the timer and input viewer press E.
+
 To save the TAS press M, which will automatically create a file called 'TAS1.tas' (replacing the 1 with the level number you are on) in the love2d folder (check the [love2d page](https://love2d.org/wiki/love.filesystem) for more information).
 
 To open a TAS file, simply drag the file into the window, note that this won't change the current state of the game, so you should always press D after loading a file.
@@ -31,5 +33,7 @@ To open a TAS file, simply drag the file into the window, note that this won't c
 To edit the position of the balloons (which are determined by RNG) press B, which will toggle balloon mode, while in balloon mode you can press the right and left arrow keys to change the selected balloon, to change the position of the selected balloon use the up and down arrow keys, you will see a number under the balloon changing, that's the balloon's seed. When you save a file the balloon seeds will get saved and will also get saved when you press D.
 
 Press Y to see the current position, rem values (sub-pixels) and speed of the player on the console.
+
+To reproduce a full game TAS, create a folder named 'TAS' inside the love2d folder, inside this folder there should be a TAS file for each level, named TAS1, TAS2, ...., TAS31 (you can't TAS level 31, so you should download the TAS31 file from the existing TASes), and to reproduce it press N.
 
 You can press F1 or F6 to save a screenshot, F3 or F8 to start a recording and F4 or F9 to save the recording, both saved to the love2d folder.
