@@ -37,3 +37,6 @@ Press Y to see the current position, rem values (sub-pixels) and speed of the pl
 To reproduce a full game TAS, create a folder named 'TAS' inside the love2d folder, inside this folder there should be a TAS file for each level, named TAS1, TAS2, ...., TAS31 (you can't TAS level 31, so you should download the TAS31 file from the existing TASes), and to reproduce it press N.
 
 You can press F1 or F6 to save a screenshot, F3 or F8 to start a recording and F4 or F9 to save the recording, both saved to the love2d folder.
+
+# TAS times
+- Any%: 1:39.96
