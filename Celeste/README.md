@@ -30,7 +30,7 @@ To save the TAS press M, which will automatically create a file called 'TAS1.tas
 
 To open a TAS file, simply drag the file into the window, note that this won't change the current state of the game, so you should always press D after loading a file.
 
-To edit the position of the balloons (which are determined by RNG) press B, which will toggle balloon mode, while in balloon mode you can press the right and left arrow keys to change the selected balloon, to change the position of the selected balloon use the up and down arrow keys, you will see a number under the balloon changing, that's the balloon's seed. When you save a file the balloon seeds will get saved and will also get saved when you press D.
+To edit the position of the balloons (which are determined by RNG) press B, which will toggle balloon mode (note that you can't toggle balloon mode on the first frame of a room being loaded), while in balloon mode you can press the right and left arrow keys to change the selected balloon, to change the position of the selected balloon use the up and down arrow keys, you will see a number under the balloon changing, that's the balloon's seed. When you save a file the balloon seeds will get saved and will also get saved when you press D.
 
 Press Y to see the current position, rem values (sub-pixels) and speed of the player on the console.
 
