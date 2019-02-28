@@ -16,9 +16,12 @@ TAS.balloon_selection=0
 TAS.up_time=0
 TAS.down_time=0
 
+TAS.showdebug=true
+
 TAS.balloon_seeds={}
 
 TAS.reproduce=false
+TAS.final_reproduce=false
 
 local function get_state()
 	local state={}
@@ -479,18 +482,34 @@ local function update()
 		end
 		
 		if pico8.cart.beat_level then
-			pico8.cart.beat_level=false
-			TAS.practice_timing=false
-			pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
-			pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
-			pico8.cart.show_keys=false
-			TAS.keypress_frame=1
-			local iterator2=0
-			for _,o in pairs(pico8.cart.objects) do
-				if o.type.id=="balloon" then
-					o.initial_offset=TAS.balloon_seeds[iterator2]
-					o.offset=o.initial_offset
-					iterator2=iterator2+1
+			if not TAS.final_reproduce then
+				if pico8.cart.level_index()<=21 then
+					pico8.cart.max_djump=1
+					pico8.cart.new_bg=nil
+				end
+				
+				pico8.cart.beat_level=false
+				TAS.practice_timing=false
+				pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
+				pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
+				pico8.cart.show_keys=false
+				TAS.keypress_frame=1
+				TAS.current_frame=0
+				local iterator2=0
+				for _,o in pairs(pico8.cart.objects) do
+					if o.type.id=="balloon" then
+						o.initial_offset=TAS.balloon_seeds[iterator2]
+						o.offset=o.initial_offset
+						iterator2=iterator2+1
+					end
+				end
+			else
+				pico8.cart.beat_level=false
+				pico8.cart.next_room()
+				TAS.load_file(love.filesystem.newFile("TAS/TAS"..tostring(pico8.cart.level_index()+1)..".tas"))
+				TAS.reproduce=true
+				if pico8.cart.level_index()==30 then
+					log(tostring(pico8.cart.minutes<10 and "0"..pico8.cart.minutes or pico8.cart.minutes)..":"..tostring(pico8.cart.seconds<10 and "0"..pico8.cart.seconds or pico8.cart.seconds)..tostring(pico8.cart.frames/30):sub(2))
 				end
 			end
 		end
@@ -547,18 +566,20 @@ local function draw()
 		end
 	end
 
-	pico8.cart.rectfill(1,1,13,7,0)
-	pico8.cart.print(tostring(TAS.practice_time),2,2,7)
-	
-	local inputs_x=15
-	pico8.cart.rectfill(inputs_x,1,inputs_x+24,11,0)
-	if pico8.cart.show_keys then
-		pico8.cart.rectfill(inputs_x + 12, 7, inputs_x + 14, 9, TAS.keypresses[TAS.keypress_frame][0] and 7 or 1) -- l
-		pico8.cart.rectfill(inputs_x + 20, 7, inputs_x + 22, 9, TAS.keypresses[TAS.keypress_frame][1] and 7 or 1) -- r
-		pico8.cart.rectfill(inputs_x + 16, 3, inputs_x + 18, 5, TAS.keypresses[TAS.keypress_frame][2] and 7 or 1) -- u
-		pico8.cart.rectfill(inputs_x + 16, 7, inputs_x + 18, 9, TAS.keypresses[TAS.keypress_frame][3] and 7 or 1) -- d
-		pico8.cart.rectfill(inputs_x + 2, 7, inputs_x + 4, 9, TAS.keypresses[TAS.keypress_frame][4] and 7 or 1) -- z
-		pico8.cart.rectfill(inputs_x + 6, 7, inputs_x + 8, 9, TAS.keypresses[TAS.keypress_frame][5] and 7 or 1) -- x
+	if TAS.showdebug then
+		pico8.cart.rectfill(1,1,13,7,0)
+		pico8.cart.print(tostring(TAS.practice_time),2,2,7)
+		
+		local inputs_x=15
+		pico8.cart.rectfill(inputs_x,1,inputs_x+24,11,0)
+		if pico8.cart.show_keys then
+			pico8.cart.rectfill(inputs_x + 12, 7, inputs_x + 14, 9, TAS.keypresses[TAS.keypress_frame][0] and 7 or 1) -- l
+			pico8.cart.rectfill(inputs_x + 20, 7, inputs_x + 22, 9, TAS.keypresses[TAS.keypress_frame][1] and 7 or 1) -- r
+			pico8.cart.rectfill(inputs_x + 16, 3, inputs_x + 18, 5, TAS.keypresses[TAS.keypress_frame][2] and 7 or 1) -- u
+			pico8.cart.rectfill(inputs_x + 16, 7, inputs_x + 18, 9, TAS.keypresses[TAS.keypress_frame][3] and 7 or 1) -- d
+			pico8.cart.rectfill(inputs_x + 2, 7, inputs_x + 4, 9, TAS.keypresses[TAS.keypress_frame][4] and 7 or 1) -- z
+			pico8.cart.rectfill(inputs_x + 6, 7, inputs_x + 8, 9, TAS.keypresses[TAS.keypress_frame][5] and 7 or 1) -- x
+		end
 	end
 end
 TAS.draw=draw
@@ -600,6 +621,7 @@ end
 TAS.save_file=save_file
 
 local function load_file(file)
+	TAS.keypresses={}
 	local data=file:read()
 	local iterator=2
 	local h=0
@@ -627,6 +649,24 @@ local function load_file(file)
 			end
 		end
 	end
+	
+	TAS.reproduce=false
+	TAS.practice_timing=false
+	pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
+	pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
+	pico8.cart.show_keys=false
+	TAS.current_frame=0
+	TAS.keypress_frame=1
+	TAS.states={}
+	TAS.states_flags={}
+	local iterator2=0
+	for _,o in pairs(pico8.cart.objects) do
+		if o.type.id=="balloon" then
+			o.initial_offset=TAS.balloon_seeds[iterator2]
+			o.offset=o.initial_offset
+			iterator2=iterator2+1
+		end
+	end
 end
 TAS.load_file=load_file
 
@@ -641,15 +681,32 @@ local function ready_level()
 	pico8.cart.show_keys=false
 	TAS.balloon_mode=false
 	TAS.balloon_selection=0
+	TAS.balloon_seeds={}
+	pico8.cart.freeze=0
 end
 
 local function keypress(key)
 	if key=='p' then
 		TAS.reproduce=not TAS.reproduce
+	elseif key=='e' then
+		TAS.showdebug=not TAS.showdebug
 	elseif key=='b' then
 		if TAS.current_frame>0 then
 			TAS.balloon_mode=not TAS.balloon_mode
 		end
+	elseif key=='n' then
+		TAS.final_reproduce=not TAS.final_reproduce
+		if TAS.final_reproduce then
+			ready_level()
+			pico8.cart.load_room(0,0)
+			TAS.load_file(love.filesystem.newFile("TAS/TAS1.tas"))
+		end
+		TAS.reproduce=TAS.final_reproduce
+		TAS.showdebug=not TAS.final_reproduce
+		pico8.cart.show_time=TAS.final_reproduce
+		pico8.cart.frames=0
+		pico8.cart.seconds=0
+		pico8.cart.minutes=0
 	elseif key=='y' then
 		for _,o in pairs(pico8.cart.objects) do
 			if o.type.id=="player" then
