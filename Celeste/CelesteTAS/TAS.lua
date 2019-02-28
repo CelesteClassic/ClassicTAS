@@ -205,6 +205,7 @@ local function get_state()
 			s.y=o.y
 			s.spr=o.spr
 			s.start=o.start
+			s.offset=o.offset
 			s.timer=o.timer
 			s.rem={}
 			s.rem.x=o.rem.x
@@ -378,6 +379,7 @@ local function set_state(state, state_flag)
 			local e=pico8.cart.init_object(pico8.cart.chest,o.x+4,o.y)
 			e.spr=o.spr
 			e.start=o.start
+			e.offset=o.offset
 			e.timer=o.timer
 			e.rem.x=o.rem.x
 			e.rem.y=o.rem.y
@@ -421,6 +423,11 @@ local function update_balloon(initial_offset, iterator)
 					o.y=o.start+math.sin(-o.offset*2*math.pi)*2
 				end
 				_iterator=_iterator+1
+			elseif o.id=="chest" then
+				if _iterator==iterator then
+					o.offset=initial_offset
+				end
+				_iterator=_iterator+1
 			end
 		end
 	end
@@ -447,6 +454,34 @@ local function update()
 							o.initial_offset=(o.initial_offset-delta)%1
 							o.offset=(o.offset-delta)%1
 							o.y=o.start+math.sin(-o.offset*2*math.pi)*2
+						else
+							TAS.down_time=0
+						end
+						TAS.up_time=0
+					end
+				end
+				iterator=iterator+1
+			elseif o.type.id=="chest" then
+				if iterator==TAS.balloon_selection then
+					if love.keyboard.isDown("up") then
+						if TAS.up_time==0 then
+							TAS.up_time=1
+							o.offset=o.offset+1
+							if o.offset==2 then
+								o.offset=-1
+							end
+							update_balloon(o.offset,iterator)
+						end
+					else
+						if love.keyboard.isDown("down") then
+							if TAS.down_time==0 then
+								TAS.down_time=1
+								o.offset=o.offset-1
+								if o.offset==-2 then
+									o.offset=1
+								end
+								update_balloon(o.offset,iterator)
+							end
 						else
 							TAS.down_time=0
 						end
@@ -510,6 +545,9 @@ local function update()
 				TAS.reproduce=true
 				if pico8.cart.level_index()==30 then
 					log(tostring(pico8.cart.minutes<10 and "0"..pico8.cart.minutes or pico8.cart.minutes)..":"..tostring(pico8.cart.seconds<10 and "0"..pico8.cart.seconds or pico8.cart.seconds)..tostring(pico8.cart.frames/30):sub(2))
+					TAS.final_reproduce=false
+					TAS.showdebug=true
+					pico8.cart.show_time=false
 				end
 			end
 		end
@@ -562,11 +600,18 @@ local function draw()
 					pico8.cart.print(offset,o.x+5-#offset*2,o.y+10,9)
 				end
 				iterator=iterator+1
+			elseif o.type.id=="chest" then
+				if iterator==TAS.balloon_selection then
+					love.graphics.setColor(1,0,1)
+					love.graphics.rectangle("line",o.x,o.y-1,9,9)
+					pico8.cart.print(o.offset,o.x+3,o.y+10,9)
+				end
+				iterator=iterator+1
 			end
 		end
 	end
 
-	if TAS.showdebug then
+	if TAS.showdebug and pico8.cart.level_index()<30 then
 		pico8.cart.rectfill(1,1,13,7,0)
 		pico8.cart.print(tostring(TAS.practice_time),2,2,7)
 		
@@ -665,6 +710,9 @@ local function load_file(file)
 			o.initial_offset=TAS.balloon_seeds[iterator2]
 			o.offset=o.initial_offset
 			iterator2=iterator2+1
+		elseif o.type.id=="chest" then
+			o.offset=TAS.balloon_seeds[iterator2]
+			iterator2=iterator2+1
 		end
 	end
 end
@@ -689,10 +737,14 @@ local function keypress(key)
 	if key=='p' then
 		TAS.reproduce=not TAS.reproduce
 	elseif key=='e' then
-		TAS.showdebug=not TAS.showdebug
+		if not TAS.final_reproduce then
+			TAS.showdebug=not TAS.showdebug
+		end
 	elseif key=='b' then
-		if TAS.current_frame>0 then
-			TAS.balloon_mode=not TAS.balloon_mode
+		if not TAS.final_reproduce then
+			if TAS.current_frame>0 then
+				TAS.balloon_mode=not TAS.balloon_mode
+			end
 		end
 	elseif key=='n' then
 		TAS.final_reproduce=not TAS.final_reproduce
@@ -700,9 +752,13 @@ local function keypress(key)
 			ready_level()
 			pico8.cart.load_room(0,0)
 			TAS.load_file(love.filesystem.newFile("TAS/TAS1.tas"))
+			pico8.cart.max_djump=1
+			pico8.cart.new_bg=nil
+			pico8.cart.music(0,0,7)
 		end
 		TAS.reproduce=TAS.final_reproduce
 		TAS.showdebug=not TAS.final_reproduce
+		TAS.balloon_mode=false
 		pico8.cart.show_time=TAS.final_reproduce
 		pico8.cart.frames=0
 		pico8.cart.seconds=0
@@ -717,117 +773,132 @@ local function keypress(key)
 			end
 		end
 	elseif key=='f' then
-		if not pico8.cart.pause_player then
-			ready_level()
-			if pico8.cart.level_index()<29 then
-				pico8.cart.got_fruit[2+pico8.cart.level_index()]=false
-				pico8.cart.next_room()
-				TAS.practice_time=0
-				pico8.cart.start_practice_time=false
-				if pico8.cart.level_index()>21 then
-					pico8.cart.max_djump=2
-					pico8.cart.new_bg=true
-				end
-				local i=0
-				for _,o in pairs(pico8.cart.objects) do
-					if o.type.id=="balloon" then
-						TAS.balloon_seeds[i]=0
-						o.initial_offset=0
-						o.offset=0
-						i=i+1
+		if not TAS.final_reproduce then
+			if not pico8.cart.pause_player then
+				ready_level()
+				if pico8.cart.level_index()<29 then
+					pico8.cart.got_fruit[2+pico8.cart.level_index()]=false
+					pico8.cart.next_room()
+					TAS.practice_time=0
+					pico8.cart.start_practice_time=false
+					if pico8.cart.level_index()>21 then
+						pico8.cart.max_djump=2
+						pico8.cart.new_bg=true
 					end
-				end
-			else
-				pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
-				pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
-				pico8.cart.start_practice_time=false
-				local i=0
-				for _,o in pairs(pico8.cart.objects) do
-					if o.type.id=="balloon" then
-						TAS.balloon_seeds[i]=0
-						o.initial_offset=0
-						o.offset=0
-						i=i+1
+					local i=0
+					for _,o in pairs(pico8.cart.objects) do
+						if o.type.id=="balloon" then
+							TAS.balloon_seeds[i]=0
+							o.initial_offset=0
+							o.offset=0
+							i=i+1
+						end
+					end
+				else
+					pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
+					pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
+					pico8.cart.start_practice_time=false
+					local i=0
+					for _,o in pairs(pico8.cart.objects) do
+						if o.type.id=="balloon" then
+							TAS.balloon_seeds[i]=0
+							o.initial_offset=0
+							o.offset=0
+							i=i+1
+						end
 					end
 				end
 			end
 		end
 	elseif key=='s' then
-		if not pico8.cart.pause_player then
-			ready_level()
-			if pico8.cart.level_index()>0 then
-				if pico8.cart.room.x==0 then
-					pico8.cart.room.x=7
-					pico8.cart.room.y=pico8.cart.room.y-1
-				else
-					pico8.cart.room.x=pico8.cart.room.x-1
-				end
-				pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
-				pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
-				if pico8.cart.level_index()<=21 then
-					pico8.cart.max_djump=1
-					pico8.cart.new_bg=nil
-				end
-				local i=0
-				for _,o in pairs(pico8.cart.objects) do
-					if o.type.id=="balloon" then
-						TAS.balloon_seeds[i]=0
-						o.initial_offset=0
-						o.offset=0
-						i=i+1
+		if not TAS.final_reproduce then
+			if not pico8.cart.pause_player then
+				ready_level()
+				if pico8.cart.level_index()>0 then
+					if pico8.cart.room.x==0 then
+						pico8.cart.room.x=7
+						pico8.cart.room.y=pico8.cart.room.y-1
+					else
+						pico8.cart.room.x=pico8.cart.room.x-1
 					end
-				end
-			else
-				pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
-				pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
-				pico8.cart.start_practice_time=false
-				local i=0
-				for _,o in pairs(pico8.cart.objects) do
-					if o.type.id=="balloon" then
-						TAS.balloon_seeds[i]=0
-						o.initial_offset=0
-						o.offset=0
-						i=i+1
+					pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
+					pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
+					if pico8.cart.level_index()<=21 then
+						pico8.cart.max_djump=1
+						pico8.cart.new_bg=nil
+					end
+					local i=0
+					for _,o in pairs(pico8.cart.objects) do
+						if o.type.id=="balloon" then
+							TAS.balloon_seeds[i]=0
+							o.initial_offset=0
+							o.offset=0
+							i=i+1
+						end
+					end
+				else
+					pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
+					pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
+					pico8.cart.start_practice_time=false
+					local i=0
+					for _,o in pairs(pico8.cart.objects) do
+						if o.type.id=="balloon" then
+							TAS.balloon_seeds[i]=0
+							o.initial_offset=0
+							o.offset=0
+							i=i+1
+						end
 					end
 				end
 			end
 		end
 	elseif key=='d' then
-		TAS.reproduce=false
-		TAS.practice_timing=false
-		pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
-		pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
-		pico8.cart.show_keys=false
-		TAS.current_frame=0
-		TAS.keypress_frame=1
-		TAS.states={}
-		TAS.states_flags={}
-		local iterator2=0
-		for _,o in pairs(pico8.cart.objects) do
-			if o.type.id=="balloon" then
-				o.initial_offset=TAS.balloon_seeds[iterator2]
-				o.offset=o.initial_offset
-				iterator2=iterator2+1
+		if not TAS.final_reproduce then
+			TAS.reproduce=false
+			TAS.practice_timing=false
+			pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
+			pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
+			pico8.cart.show_keys=false
+			TAS.current_frame=0
+			TAS.keypress_frame=1
+			TAS.states={}
+			TAS.states_flags={}
+			local iterator2=0
+			for _,o in pairs(pico8.cart.objects) do
+				if o.type.id=="balloon" then
+					o.initial_offset=TAS.balloon_seeds[iterator2]
+					o.offset=o.initial_offset
+					iterator2=iterator2+1
+				elseif o.type.id=="chest" then
+					o.offset=TAS.balloon_seeds[iterator2]
+					iterator2=iterator2+1
+				end
 			end
 		end
 	elseif key=='r' then
-		ready_level()
-		pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
-		pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
-		TAS.keypress_frame=1
+		if not TAS.final_reproduce then
+			ready_level()
+			pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
+			pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
+			TAS.keypress_frame=1
+		end
 	elseif key=='l' then
-		TAS.advance_frame=true
-		local state, state_flag=get_state()
-		TAS.states[TAS.current_frame]=state
-		TAS.states_flags[TAS.current_frame]=state_flag
+		if not TAS.final_reproduce then
+			TAS.advance_frame=true
+			local state, state_flag=get_state()
+			TAS.states[TAS.current_frame]=state
+			TAS.states_flags[TAS.current_frame]=state_flag
+		end
 	elseif key=='k' then
-		if TAS.current_frame>0 then
-			TAS.current_frame=TAS.current_frame-1
-			if pico8.cart.show_keys then
-				TAS.keypress_frame=TAS.keypress_frame-1
+		if not TAS.final_reproduce then
+			if TAS.current_frame>0 then
+				TAS.current_frame=TAS.current_frame-1
+				if pico8.cart.show_keys then
+					TAS.keypress_frame=TAS.keypress_frame-1
+				end
+				set_state(TAS.states[TAS.current_frame], TAS.states_flags[TAS.current_frame])
+				TAS.practice_time=math.max(TAS.practice_time-1,0)
 			end
-			set_state(TAS.states[TAS.current_frame], TAS.states_flags[TAS.current_frame])
-			TAS.practice_time=math.max(TAS.practice_time-1,0)
 		end
 	elseif key=='up' then
 		if not TAS.reproduce then
@@ -888,7 +959,13 @@ local function restart()
 	TAS.current_frame=0
 	TAS.keypress_frame=1
 	TAS.balloon_mode=false
+	TAS.balloon_selection=0
+	TAS.up_time=0
+	TAS.down_time=0
+	TAS.showdebug=true
+	TAS.balloon_seeds={}
 	TAS.reproduce=false
+	TAS.final_reproduce=false
 end
 TAS.restart=restart
 

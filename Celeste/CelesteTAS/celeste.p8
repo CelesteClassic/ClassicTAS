@@ -762,6 +762,7 @@ chest={
 	init=function(this)
 		this.x-=4
 		this.start=this.x
+		this.offset=0
 		this.timer=20
 	end,
 	update=function(this)
@@ -769,6 +770,7 @@ chest={
 			this.timer-=1
 			this.x=this.start-1+rnd(3)
 			if this.timer<=0 then
+			 this.x=this.start+this.offset
 			 sfx_timer=20
 			 sfx(16)
 				init_object(fruit,this.x,this.y-4)
@@ -934,10 +936,6 @@ room_title = {
 				print(level.." m",52+(level<1000 and 2 or 0),62,7)
 			end
 			--print("---",86,64-2,13)
-			
-			if show_time then
-				draw_time(4,4)
-			end
 		end
 	end
 }
@@ -1121,7 +1119,7 @@ function load_room(x,y)
 	for tx=0,15 do
 		for ty=0,15 do
 			local tile = mget(room.x*16+tx,room.y*16+ty);
-			if tile==22 then
+			if tile==22 or tile==20 then
 				balloon_count+=1
 			end
 			if tile==11 then
@@ -1253,7 +1251,7 @@ function _draw()
 		bg_col=2
 	end
 	rectfill(0,0,128,128,bg_col)
-
+	
 	-- clouds
 	if not is_title() then
 		foreach(clouds, function(c)
@@ -1338,7 +1336,10 @@ function _draw()
 			rectfill(128-diff,0,128,128,0)
 		end
 	end
-
+	
+	if show_time then
+		draw_time(1,1)
+	end
 end
 
 function draw_object(obj)
