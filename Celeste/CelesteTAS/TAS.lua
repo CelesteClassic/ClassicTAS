@@ -867,6 +867,7 @@ local function keypress(key)
 			pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
 			pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
 			pico8.cart.show_keys=false
+			pico8.cart.will_restart=false
 			TAS.current_frame=0
 			TAS.keypress_frame=1
 			TAS.states={}
