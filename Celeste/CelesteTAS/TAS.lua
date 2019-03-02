@@ -792,6 +792,10 @@ local function keypress(key)
 							o.initial_offset=0
 							o.offset=0
 							i=i+1
+						elseif o.type.id=="chest" then
+							TAS.balloon_seeds[i]=0
+							o.offset=0
+							i=i+1
 						end
 					end
 				else
@@ -803,6 +807,10 @@ local function keypress(key)
 						if o.type.id=="balloon" then
 							TAS.balloon_seeds[i]=0
 							o.initial_offset=0
+							o.offset=0
+							i=i+1
+						elseif o.type.id=="chest" then
+							TAS.balloon_seeds[i]=0
 							o.offset=0
 							i=i+1
 						end
