@@ -763,6 +763,7 @@ local function keypress(key)
 		pico8.cart.frames=0
 		pico8.cart.seconds=0
 		pico8.cart.minutes=0
+		pico8.cart.deaths=0
 	elseif key=='y' then
 		for _,o in pairs(pico8.cart.objects) do
 			if o.type.id=="player" then
