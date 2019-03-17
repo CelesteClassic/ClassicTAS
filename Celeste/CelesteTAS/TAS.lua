@@ -774,6 +774,7 @@ local function keypress(key)
 			end
 		end
 	elseif key=='f' then
+		pico8.cart.will_restart=false
 		if not TAS.final_reproduce then
 			if not pico8.cart.pause_player then
 				ready_level()
@@ -820,6 +821,7 @@ local function keypress(key)
 			end
 		end
 	elseif key=='s' then
+		pico8.cart.will_restart=false
 		if not TAS.final_reproduce then
 			if not pico8.cart.pause_player then
 				ready_level()
