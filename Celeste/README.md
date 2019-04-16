@@ -39,4 +39,4 @@ To reproduce a full game TAS, create a folder named 'TAS' inside the love2d fold
 You can press F1 or F6 to save a screenshot, F3 or F8 to start a recording and F4 or F9 to save the recording, both saved to the love2d folder.
 
 # TAS times
-- Any%: 1:39.66
+- Any%: 1:39.50
