@@ -218,6 +218,7 @@ local function get_state()
 			s.y=o.y
 			s.spr=o.spr
 			s.dir=o.dir
+			s.spd_x=o.spd.x
 			s.rem={}
 			s.rem.x=o.rem.x
 			s.rem.y=o.rem.y
@@ -387,6 +388,7 @@ local function set_state(state, state_flag)
 			local e=pico8.cart.init_object(pico8.cart.platform,o.x+4,o.y)
 			e.spr=o.spr
 			e.dir=o.dir
+			e.spd.x=o.spd_x
 			e.rem.x=o.rem.x
 			e.rem.y=o.rem.y
 		elseif o.id=="big_chest" then
@@ -525,19 +527,10 @@ local function update()
 				
 				pico8.cart.beat_level=false
 				TAS.practice_timing=false
-				pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
-				pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
 				pico8.cart.show_keys=false
 				TAS.keypress_frame=1
 				TAS.current_frame=0
-				local iterator2=0
-				for _,o in pairs(pico8.cart.objects) do
-					if o.type.id=="balloon" then
-						o.initial_offset=TAS.balloon_seeds[iterator2]
-						o.offset=o.initial_offset
-						iterator2=iterator2+1
-					end
-				end
+				load_level(pico8.cart.room.x, pico8.cart.room.y)
 			else
 				pico8.cart.beat_level=false
 				pico8.cart.next_room()
@@ -665,6 +658,44 @@ local function save_file()
 end
 TAS.save_file=save_file
 
+local function ready_level()
+	TAS.states={}
+	TAS.state_flags={}
+	TAS.keypresses={}
+	TAS.keypresses[1]={}
+	TAS.current_frame=0
+	TAS.practice_timing=false
+	TAS.practice_time=0
+	pico8.cart.show_keys=false
+	TAS.balloon_mode=false
+	TAS.balloon_selection=0
+	TAS.balloon_seeds={}
+	pico8.cart.freeze=0
+	TAS.keypress_frame=1
+end
+
+function load_level(room_x, room_y)
+	pico8.cart.got_fruit[1+room_y*8+room_x%8]=false
+	pico8.cart.load_room(room_x, room_y)
+	TAS.practice_time=0
+	pico8.cart.start_practice_time=false
+	local i=0
+	for _,o in pairs(pico8.cart.objects) do
+		if o.type.id=="balloon" then
+			TAS.balloon_seeds[i]=0
+			o.initial_offset=0
+			o.offset=0
+			i=i+1
+		elseif o.type.id=="chest" then
+			TAS.balloon_seeds[i]=0
+			o.offset=0
+			i=i+1
+		elseif o.type.id=="platform" then
+			o.rem.x=o.dir*0.65
+		end
+	end
+end
+
 local function load_file(file)
 	TAS.keypresses={}
 	local data=file:read()
@@ -713,25 +744,12 @@ local function load_file(file)
 		elseif o.type.id=="chest" then
 			o.offset=TAS.balloon_seeds[iterator2]
 			iterator2=iterator2+1
+		elseif o.type.id=="platform" then
+			o.rem.x=o.dir*0.65
 		end
 	end
 end
 TAS.load_file=load_file
-
-local function ready_level()
-	TAS.states={}
-	TAS.state_flags={}
-	TAS.keypresses={}
-	TAS.keypresses[1]={}
-	TAS.current_frame=0
-	TAS.practice_timing=false
-	TAS.practice_time=0
-	pico8.cart.show_keys=false
-	TAS.balloon_mode=false
-	TAS.balloon_selection=0
-	TAS.balloon_seeds={}
-	pico8.cart.freeze=0
-end
 
 local function keypress(key)
 	if key=='p' then
@@ -779,44 +797,19 @@ local function keypress(key)
 			if not pico8.cart.pause_player then
 				ready_level()
 				if pico8.cart.level_index()<29 then
-					pico8.cart.got_fruit[2+pico8.cart.level_index()]=false
-					pico8.cart.next_room()
-					TAS.practice_time=0
-					pico8.cart.start_practice_time=false
+					if pico8.cart.room.x==7 then
+						pico8.cart.room.x=0
+						pico8.cart.room.y=pico8.cart.room.y+1
+					else
+						pico8.cart.room.x=pico8.cart.room.x+1
+					end
+					load_level(pico8.cart.room.x, pico8.cart.room.y)
 					if pico8.cart.level_index()>21 then
 						pico8.cart.max_djump=2
 						pico8.cart.new_bg=true
 					end
-					local i=0
-					for _,o in pairs(pico8.cart.objects) do
-						if o.type.id=="balloon" then
-							TAS.balloon_seeds[i]=0
-							o.initial_offset=0
-							o.offset=0
-							i=i+1
-						elseif o.type.id=="chest" then
-							TAS.balloon_seeds[i]=0
-							o.offset=0
-							i=i+1
-						end
-					end
 				else
-					pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
-					pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
-					pico8.cart.start_practice_time=false
-					local i=0
-					for _,o in pairs(pico8.cart.objects) do
-						if o.type.id=="balloon" then
-							TAS.balloon_seeds[i]=0
-							o.initial_offset=0
-							o.offset=0
-							i=i+1
-						elseif o.type.id=="chest" then
-							TAS.balloon_seeds[i]=0
-							o.offset=0
-							i=i+1
-						end
-					end
+					load_level(pico8.cart.room.x, pico8.cart.room.y)
 				end
 			end
 		end
@@ -832,34 +825,13 @@ local function keypress(key)
 					else
 						pico8.cart.room.x=pico8.cart.room.x-1
 					end
-					pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
-					pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
+					load_level(pico8.cart.room.x, pico8.cart.room.y)
 					if pico8.cart.level_index()<=21 then
 						pico8.cart.max_djump=1
 						pico8.cart.new_bg=nil
 					end
-					local i=0
-					for _,o in pairs(pico8.cart.objects) do
-						if o.type.id=="balloon" then
-							TAS.balloon_seeds[i]=0
-							o.initial_offset=0
-							o.offset=0
-							i=i+1
-						end
-					end
 				else
-					pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
-					pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
-					pico8.cart.start_practice_time=false
-					local i=0
-					for _,o in pairs(pico8.cart.objects) do
-						if o.type.id=="balloon" then
-							TAS.balloon_seeds[i]=0
-							o.initial_offset=0
-							o.offset=0
-							i=i+1
-						end
-					end
+					load_level(pico8.cart.room.x, pico8.cart.room.y)
 				end
 			end
 		end
@@ -867,25 +839,13 @@ local function keypress(key)
 		if not TAS.final_reproduce then
 			TAS.reproduce=false
 			TAS.practice_timing=false
-			pico8.cart.got_fruit[1+pico8.cart.level_index()]=false
-			pico8.cart.load_room(pico8.cart.room.x,pico8.cart.room.y)
 			pico8.cart.show_keys=false
 			pico8.cart.will_restart=false
 			TAS.current_frame=0
 			TAS.keypress_frame=1
 			TAS.states={}
 			TAS.states_flags={}
-			local iterator2=0
-			for _,o in pairs(pico8.cart.objects) do
-				if o.type.id=="balloon" then
-					o.initial_offset=TAS.balloon_seeds[iterator2]
-					o.offset=o.initial_offset
-					iterator2=iterator2+1
-				elseif o.type.id=="chest" then
-					o.offset=TAS.balloon_seeds[iterator2]
-					iterator2=iterator2+1
-				end
-			end
+			load_level(pico8.cart.room.x, pico8.cart.room.y)
 		end
 	elseif key=='r' then
 		if not TAS.final_reproduce then
