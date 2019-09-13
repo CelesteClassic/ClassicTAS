@@ -26,7 +26,7 @@ To reload the level and delete your inputs press R.
 
 To hide/unhide the timer and input viewer press E.
 
-To save the TAS press M, which will automatically create a file called 'TAS1.tas' (replacing the 1 with the level number you are on) in the love2d folder (check the [love2d page](https://love2d.org/wiki/love.filesystem) for more information).
+To save the TAS press M, which will automatically create a file called 'TAS1.tas' (replacing the 1 with the level number you are on) in the love2d folder (check the [love2d page](https://love2d.org/wiki/love.filesystem) for more information), or check the console message that appears when you save the TAS, which specifies the directory it gets saved to.
 
 To open a TAS file, simply drag the file into the window, note that this won't change the current state of the game, so you should always press D after loading a file.
 
@@ -36,7 +36,7 @@ Press Y to see the current position, rem values (sub-pixels) and speed of the pl
 
 To reproduce a full game TAS, create a folder named 'TAS' inside the love2d folder, inside this folder there should be a TAS file for each level, named TAS1, TAS2, ...., TAS31 (you can't TAS level 31, so you should download the TAS31 file from the existing TASes), and to reproduce it press N.
 
-You can press F1 or F6 to save a screenshot, F3 or F8 to start a recording and F4 or F9 to save the recording, both saved to the love2d folder.
+You can press F1 or F6 to save a screenshot, F3 or F8 to start a recording and F4 or F9 to save the recording, both saved to the love2d folder, and the console output will show what that directory is.
 
 # TAS times
 - Any%: 1:38.90
