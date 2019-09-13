@@ -40,3 +40,4 @@ You can press F1 or F6 to save a screenshot, F3 or F8 to start a recording and F
 
 # TAS times
 - Any%: 1:38.56
+- 100%: 1:59.83
