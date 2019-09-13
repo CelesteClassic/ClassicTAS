@@ -916,6 +916,7 @@ local function keypress(key)
 		end
 	elseif key=='m' then
 		TAS.save_file()
+		log("Saved file to "..love.filesystem.getRealDirectory(""))
 	end
 end
 TAS.keypress=keypress

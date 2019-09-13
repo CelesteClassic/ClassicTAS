@@ -679,7 +679,7 @@ function love.keypressed(key)
 		-- stop recording and save
 		if gif_recording~=nil then
 			gif_recording:close()
-			log('saved recording to '..gif_recording.filename)
+			log('saved recording to '..love.filesystem.getRealDirectory("").."/"..gif_recording.filename)
 			gif_recording=nil
 			gif_canvas=nil
 		else
