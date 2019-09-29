@@ -530,7 +530,8 @@ local function update()
 				pico8.cart.show_keys=false
 				TAS.keypress_frame=1
 				TAS.current_frame=0
-				load_level(pico8.cart.room.x, pico8.cart.room.y)
+				load_level(pico8.cart.room.x, pico8.cart.room.y, false)
+				set_seeds()
 			else
 				pico8.cart.beat_level=false
 				pico8.cart.next_room()
@@ -674,7 +675,23 @@ local function ready_level()
 	TAS.keypress_frame=1
 end
 
-function load_level(room_x, room_y)
+function set_seeds()
+	local iterator2=0
+	for _,o in pairs(pico8.cart.objects) do
+		if o.type.id=="balloon" then
+			o.initial_offset=TAS.balloon_seeds[iterator2]
+			o.offset=o.initial_offset
+			iterator2=iterator2+1
+		elseif o.type.id=="chest" then
+			o.offset=TAS.balloon_seeds[iterator2]
+			iterator2=iterator2+1
+		elseif o.type.id=="platform" then
+			o.rem.x=o.dir*0.65
+		end
+	end
+end
+
+function load_level(room_x, room_y, reset_seeds)
 	pico8.cart.got_fruit[1+room_y*8+room_x%8]=false
 	pico8.cart.load_room(room_x, room_y)
 	TAS.practice_time=0
@@ -682,14 +699,18 @@ function load_level(room_x, room_y)
 	local i=0
 	for _,o in pairs(pico8.cart.objects) do
 		if o.type.id=="balloon" then
-			TAS.balloon_seeds[i]=0
-			o.initial_offset=0
-			o.offset=0
-			i=i+1
+		    if reset_seeds then
+				TAS.balloon_seeds[i]=0
+				o.initial_offset=0
+				o.offset=0
+				i=i+1
+			end
 		elseif o.type.id=="chest" then
-			TAS.balloon_seeds[i]=0
-			o.offset=0
-			i=i+1
+		    if reset_seeds then
+				TAS.balloon_seeds[i]=0
+				o.offset=0
+				i=i+1
+			end
 		elseif o.type.id=="platform" then
 			o.rem.x=o.dir*0.65
 		end
@@ -735,19 +756,7 @@ local function load_file(file)
 	TAS.keypress_frame=1
 	TAS.states={}
 	TAS.states_flags={}
-	local iterator2=0
-	for _,o in pairs(pico8.cart.objects) do
-		if o.type.id=="balloon" then
-			o.initial_offset=TAS.balloon_seeds[iterator2]
-			o.offset=o.initial_offset
-			iterator2=iterator2+1
-		elseif o.type.id=="chest" then
-			o.offset=TAS.balloon_seeds[iterator2]
-			iterator2=iterator2+1
-		elseif o.type.id=="platform" then
-			o.rem.x=o.dir*0.65
-		end
-	end
+	set_seeds()
 end
 TAS.load_file=load_file
 
@@ -803,13 +812,13 @@ local function keypress(key)
 					else
 						pico8.cart.room.x=pico8.cart.room.x+1
 					end
-					load_level(pico8.cart.room.x, pico8.cart.room.y)
+					load_level(pico8.cart.room.x, pico8.cart.room.y, true)
 					if pico8.cart.level_index()>21 then
 						pico8.cart.max_djump=2
 						pico8.cart.new_bg=true
 					end
 				else
-					load_level(pico8.cart.room.x, pico8.cart.room.y)
+					load_level(pico8.cart.room.x, pico8.cart.room.y, true)
 				end
 			end
 		end
@@ -825,13 +834,13 @@ local function keypress(key)
 					else
 						pico8.cart.room.x=pico8.cart.room.x-1
 					end
-					load_level(pico8.cart.room.x, pico8.cart.room.y)
+					load_level(pico8.cart.room.x, pico8.cart.room.y, true)
 					if pico8.cart.level_index()<=21 then
 						pico8.cart.max_djump=1
 						pico8.cart.new_bg=nil
 					end
 				else
-					load_level(pico8.cart.room.x, pico8.cart.room.y)
+					load_level(pico8.cart.room.x, pico8.cart.room.y, true)
 				end
 			end
 		end
@@ -845,7 +854,8 @@ local function keypress(key)
 			TAS.keypress_frame=1
 			TAS.states={}
 			TAS.states_flags={}
-			load_level(pico8.cart.room.x, pico8.cart.room.y)
+			load_level(pico8.cart.room.x, pico8.cart.room.y, false)
+			set_seeds()
 		end
 	elseif key=='r' then
 		if not TAS.final_reproduce then
